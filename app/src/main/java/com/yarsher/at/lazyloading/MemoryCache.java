@@ -59,6 +59,15 @@ public class MemoryCache {
         }
     }
 
+    public void clear(){
+        try {
+            cache.clear();
+            size =0;
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }
+    }
+
 
 
 
