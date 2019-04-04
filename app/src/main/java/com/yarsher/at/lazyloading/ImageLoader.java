@@ -3,6 +3,7 @@ package com.yarsher.at.lazyloading;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -51,6 +52,21 @@ public class ImageLoader {
         }
     }
 
+    private Bitmap getBitmap(String url){
+        File file = fileCache.getFiles(url);
+
+        int connectTimeout = 5000;
+        int readTimeout = 5000;
+
+        Bitmap bitmap = decodeFile(file);
+
+
+        return null;
+    }
+
+
+
+
     private class PhotosLoader implements Runnable {
         PhotoToLoad photoToLoad;
         public PhotosLoader(PhotoToLoad p) {
@@ -61,13 +77,38 @@ public class ImageLoader {
         public void run() {
             try {
                 if (imageViewsReused(photoToLoad))return;
+                Bitmap bitmap = getBitmap(photoToLoad.url);
+                memoryCache.put(photoToLoad.url, bitmap);
+                if (imageViewsReused(photoToLoad))return;
+                BitmapDisplay bitmapDisplay = new BitmapDisplay(bitmap, photoToLoad);
+                handler.post(bitmapDisplay);
+            }catch (Throwable e){
+                e.printStackTrace();
             }
+        }
+    }
+
+    class BitmapDisplay implements Runnable{
+        Bitmap bitmap;
+        PhotoToLoad photoToLoad;
+
+        public BitmapDisplay(Bitmap bitmap, PhotoToLoad photoToLoad) {
+            this.bitmap = bitmap;
+            this.photoToLoad = photoToLoad;
+        }
+
+        @Override
+        public void run() {
+            if(imageViewsReused(photoToLoad))return;
+            if (bitmap != null) photoToLoad.imageView.setImageBitmap(bitmap);
+            else photoToLoad.imageView.setImageResource(stub_id);
         }
     }
 
 
     boolean imageViewsReused(PhotoToLoad photoToLoad){
         String tag = imageViews.get(photoToLoad.imageView);
+        if (tag == null || !tag.equals(photoToLoad.url))return true;
 
         return false;
     }
