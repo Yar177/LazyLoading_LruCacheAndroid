@@ -4,6 +4,13 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -59,6 +66,26 @@ public class ImageLoader {
         int readTimeout = 5000;
 
         Bitmap bitmap = decodeFile(file);
+        if (bitmap != null)return bitmap;
+
+        try {
+            Bitmap bitmap1 = null;
+            URL imageURL = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) imageURL.openConnection();
+            connection.setConnectTimeout(connectTimeout);
+            connection.setReadTimeout(readTimeout);
+            connection.setInstanceFollowRedirects(true);
+            InputStream inputStream = connection.getInputStream();
+            OutputStream outputStream = new FileOutputStream(file);
+            Utils.CopyStream(inputStream, outputStream);
+
+
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         return null;
