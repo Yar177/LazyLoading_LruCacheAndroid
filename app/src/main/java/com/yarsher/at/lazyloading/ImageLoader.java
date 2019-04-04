@@ -66,6 +66,14 @@ public class ImageLoader {
 
 
 
+    private Bitmap decodeFile(File file){
+
+
+        return null;
+    }
+
+
+
 
     private class PhotosLoader implements Runnable {
         PhotoToLoad photoToLoad;
